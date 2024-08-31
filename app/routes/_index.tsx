@@ -1,9 +1,19 @@
-import type { MetaFunction } from "@remix-run/node";
+import { json, type LoaderFunction, type MetaFunction } from "@remix-run/node";
+import { getUser } from "~/data-access/UserDAO.server";
+
+export const loader: LoaderFunction = async ({}) => {
+  const resp = await getUser("chankruze@gmail.com");
+  console.log(resp);
+  return json({ resp });
+};
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "New Remix App" },
-    { name: "description", content: "Welcome to Remix!" },
+    { title: "chokidar - secure your android!" },
+    {
+      name: "description",
+      content: "Protect your smartphone from unauthorized access!",
+    },
   ];
 };
 
