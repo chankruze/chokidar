@@ -94,7 +94,7 @@ export const registerUser = async (formData: FormData) => {
     return {
       ok: false,
       data: null,
-      error: errors,
+      validationErrors: errors,
     };
   }
 
@@ -117,7 +117,7 @@ export const registerUser = async (formData: FormData) => {
   if (user.ok && user.data) {
     return {
       ok: true,
-      data: { userId: user.data.toString() },
+      data: user.data.toString(),
       error: null,
     };
   }
@@ -125,7 +125,26 @@ export const registerUser = async (formData: FormData) => {
   return { ok: false, data: null, error: user.error };
 };
 
-export const loginUser = async (email: string, password: string) => {
+export const loginUser = async (formData: FormData) => {
+  const schema = z.object({
+    email: z.string().min(1, "Email must not be empty.").email(),
+    password: z.string().min(8, "Password must be 8 characters long."),
+  });
+
+  const _validation = schema.safeParse(Object.fromEntries(formData));
+  // send error data in response
+  if (!_validation.success) {
+    const errors = _validation.error.flatten();
+    // return validation errors
+    return {
+      ok: false,
+      data: null,
+      validationErrors: errors,
+    };
+  }
+
+  const { email, password } = _validation.data;
+
   // check if the user exists in the db
   const { ok, data } = await getUser(email);
   // check if the user exists
@@ -140,7 +159,7 @@ export const loginUser = async (email: string, password: string) => {
       if (!_isValid) {
         return {
           ok: false,
-          id: null,
+          data: null,
           error: "Wrong password. Please try again",
         };
       }
