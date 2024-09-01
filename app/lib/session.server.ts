@@ -6,7 +6,7 @@ const USER_SESSION_KEY = "userId";
 
 export const sessionStorage = createCookieSessionStorage({
   cookie: {
-    name: "___session__zenmarket",
+    name: "___session__chokidar",
     httpOnly: true,
     maxAge: 0,
     path: "/",
