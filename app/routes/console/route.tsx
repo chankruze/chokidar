@@ -9,9 +9,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   return json({ userId });
 };
 
-export type DeskLoader = typeof loader;
+export type ConsoleLoader = typeof loader;
 
-export default function DeskLayout() {
+export default function ConsoleLayout() {
   return (
     <div className="flex h-[100dvh] flex-col overflow-hidden">
       {/* <Topbar /> */}

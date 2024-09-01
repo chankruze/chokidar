@@ -13,7 +13,7 @@ export const getUser = async (email: string) => {
     email,
   });
   // return user
-  return { ok: true, data: _user };
+  return { ok: true, user: _user };
 };
 
 export type CreateUserParams = {
@@ -35,10 +35,10 @@ export const createUser = async (data: CreateUserParams) => {
     // create password
     await createPassword(_user.insertedId, data.password);
     // return user
-    return { ok: true, data: _user.insertedId, error: null };
+    return { ok: true, userId: _user.insertedId };
   } catch (error) {
     console.error(error);
-    return { ok: false, data: null, error: "Unable to add new user" };
+    return { ok: false, message: "Unable to add new user", error };
   }
 };
 
@@ -53,21 +53,18 @@ export const deleteUser = async (userId: string) => {
     if (deleteQuery.deletedCount === 0) {
       return {
         ok: false,
-        data: null,
         error: `Unable to delete user`,
       };
     }
     return {
       ok: true,
-      data: { message: `User [id: ${userId.toString()}] deleted.` },
-      error: null,
+      message: `User [id: ${userId.toString()}] deleted.`,
     };
   } catch (error) {
     console.error(error);
     return {
       ok: false,
-      data: null,
-      error: `Unable to delete that user.`,
+      message: `Unable to delete user.`,
     };
   }
 };
@@ -93,7 +90,6 @@ export const registerUser = async (formData: FormData) => {
     // return validation errors
     return {
       ok: false,
-      data: null,
       validationErrors: errors,
     };
   }
@@ -101,28 +97,27 @@ export const registerUser = async (formData: FormData) => {
   const { name, email, password } = _validation.data;
 
   // check if the user exists in the db
-  const { ok, data } = await getUser(email);
+  const { ok, user } = await getUser(email);
 
-  if (ok && data) {
-    return { ok: false, data: null, error: `User ${email} already exists` };
+  if (ok && user) {
+    return { ok: false, message: `User ${email} already exists` };
   }
 
-  const user = await createUser({
+  const _user = await createUser({
     name,
     email,
     password,
   });
 
   // if user creation fails
-  if (user.ok && user.data) {
+  if (_user.ok && _user.userId) {
     return {
       ok: true,
-      data: user.data.toString(),
-      error: null,
+      userId: _user.userId.toString(),
     };
   }
 
-  return { ok: false, data: null, error: user.error };
+  return { ok: false, error: _user.error, message: `Unable to register user.` };
 };
 
 export const loginUser = async (formData: FormData) => {
@@ -138,7 +133,6 @@ export const loginUser = async (formData: FormData) => {
     // return validation errors
     return {
       ok: false,
-      data: null,
       validationErrors: errors,
     };
   }
@@ -146,11 +140,11 @@ export const loginUser = async (formData: FormData) => {
   const { email, password } = _validation.data;
 
   // check if the user exists in the db
-  const { ok, data } = await getUser(email);
+  const { ok, user } = await getUser(email);
   // check if the user exists
-  if (ok && data) {
+  if (ok && user) {
     // fetch password form db
-    const _password = await getPasswordByUserId(data._id);
+    const _password = await getPasswordByUserId(user._id);
 
     if (_password) {
       const _isValid = await bcrypt.compare(password, _password.hash);
@@ -159,16 +153,15 @@ export const loginUser = async (formData: FormData) => {
       if (!_isValid) {
         return {
           ok: false,
-          data: null,
-          error: "Wrong password. Please try again",
+          message: "Wrong password. Please try again",
         };
       }
 
-      return { ok: true, data: data._id.toString(), error: null };
+      return { ok: true, userId: user._id.toString() };
     }
 
-    return { ok: false, data: null, error: "This user don't have a password" };
+    return { ok: false, message: "This user don't have a password" };
   }
 
-  return { ok: false, data: null, error: `User ${email} does not exist` };
+  return { ok: false, message: `User ${email} does not exist` };
 };
