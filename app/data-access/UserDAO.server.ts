@@ -157,7 +157,7 @@ export const loginUser = async (formData: FormData) => {
         };
       }
 
-      return { ok: true, userId: user._id.toString() };
+      return { ok: true, data: user._id.toString() };
     }
 
     return { ok: false, message: "This user don't have a password" };

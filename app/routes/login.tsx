@@ -176,7 +176,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         ok,
         data: userId,
         validationErrors,
-        error,
+        message,
       } = await loginUser(formData);
 
       if (ok && userId) {
@@ -190,7 +190,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         });
       }
 
-      return json({ ok: false, validationErrors, error }, { status: 500 });
+      return json({ ok: false, validationErrors, message }, { status: 500 });
     }
 
     default: {
